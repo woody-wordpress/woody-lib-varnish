@@ -1,0 +1,21 @@
+{
+    "name": "woody-wordpress/woody-lib-varnish",
+    "type": "wordpress-vendor",
+    "version": "1.0.0",
+    "description": "This library adds Varnish features",
+    "license": "GPL-2.0",
+    "authors": [
+        {
+            "name": "Léo POIROUX",
+            "email": "leo@raccourci.fr"
+        }
+    ],
+    "autoload": {
+        "psr-4": {
+            "Woody\\Lib\\Varnish\\": ""
+        }
+    },
+    "require": {
+        "php": "^7.3"
+    }
+}
