@@ -16,7 +16,7 @@ use Woody\Lib\Varnish\Commands\VarnishCommand;
 final class Varnish extends Module
 {
     protected static $key = 'woody_lib_varnish';
-    protected $refresh_list = [];
+    protected $xkey = null;
 
     public function initialize(ParameterManager $parameters, Container $container)
     {
@@ -25,7 +25,7 @@ final class Varnish extends Module
         define('WOODY_LIB_VARNISH_DIR_ROOT', dirname(WOODY_LIB_VARNISH_ROOT));
 
         parent::initialize($parameters, $container);
-        $this->dropZoneManager = $this->container->get('varnish.manager');
+        $this->VarnishManager = $this->container->get('varnish.manager');
         require_once WOODY_LIB_VARNISH_DIR_ROOT . '/Helpers/Helpers.php';
     }
 
@@ -45,16 +45,28 @@ final class Varnish extends Module
         register_deactivation_hook(WOODY_LIB_VARNISH_ROOT, [$this, 'deactivate']);
 
         add_action('init', [$this, 'init']);
-        add_action('woody_varnish_flush', [$this, 'flush'], 10);
-    }
+        add_action('woody_varnish_flush', [$this, 'flush'], 10, 2);
 
-    // ------------------------
-    // GETTER / SETTER
-    // ------------------------
+        // Send headers
+        if (!is_admin()) {
+            add_action('wp', [$this->VarnishManager, 'sendHeaders'], 1000000);
+        }
 
-    public function flush()
-    {
-        $this->dropZoneManager->flush();
+        // Logged in cookie
+        add_action('wp_login', [$this->VarnishManager, 'wp_login'], 1000000);
+        add_action('wp_logout', [$this->VarnishManager, 'wp_logout'], 1000000);
+
+        // Register events to purge post
+        foreach ($this->get_register_events() as $event) {
+            add_action($event, [$this, 'flush'], 10, 2);
+        }
+
+        // // Force remove varnish cookie if logout
+        // if (!is_user_logged_in() && !empty($_COOKIE[WOODY_VARNISH_CACHING_COOKIE])) {
+        //     setcookie(WOODY_VARNISH_CACHING_COOKIE, null, time()-3600*24*100, COOKIEPATH, COOKIE_DOMAIN, false, true);
+        //     wp_redirect('/wp/wp-login.php');
+        //     exit;
+        // }
     }
 
     // ------------------------
@@ -65,42 +77,64 @@ final class Varnish extends Module
         if (is_admin()) {
             $user = wp_get_current_user();
             if (in_array('administrator', $user->roles)) {
-                add_action('admin_bar_menu', [$this, 'warm_all_adminbar'], 100);
-                if (isset($_GET['refresh_varnish']) && check_admin_referer('varnish')) {
-                    $this->refresh_varnish();
+                add_action('admin_bar_menu', [$this, 'flush_admin_bar_menu'], 100);
+                if (isset($_GET['flush_admin_notice']) && check_admin_referer('varnish')) {
+                    $this->flush_admin_notice();
                 }
             }
         }
     }
 
-    public function warm_all_adminbar($admin_bar)
+    public function flush_admin_bar_menu($admin_bar)
     {
         $admin_bar->add_menu(array(
-            'id'    => 'warm-all-varnish',
-            'title' => 'Refresh Varnish',
-            'href'  => wp_nonce_url(add_query_arg('refresh_varnish', 1), 'varnish'),
+            'id'    => 'flush-varnish',
+            'title' => 'Flush Varnish',
+            'href'  => wp_nonce_url(add_query_arg('flush_admin_notice', 1), 'varnish'),
             'meta'  => array(
-                'title' => 'Refresh Varnish',
+                'title' => 'Flush Varnish',
             )
         ));
     }
 
-    public function refresh_varnish()
+    public function flush_admin_notice()
     {
-        $this->refresh_list = $this->warm_all();
-        add_action('admin_notices', [$this, 'refresh_message']);
+        $this->xkey = $this->VarnishManager->purge();
+        add_action('admin_notices', [$this, 'flush_message']);
     }
 
-    public function refresh_message()
+    public function flush_message()
     {
-        if (!empty($this->refresh_list)) {
-            echo '<div id="message" class="updated fade"><p><strong>Varnish is refreshed</strong>';
-            foreach ($this->refresh_list as $item) {
-                echo '<br />&nbsp;•&nbsp;' . $item;
-            }
-            echo '</p></div>';
-        } else {
-            echo '<div id="message" class="error fade"><p><strong>Varnish is empty</strong></p></div>';
+        if (!empty($this->xkey)) {
+            echo sprintf('<div id="message" class="updated fade"><p><strong>Varnish is flushed</strong> (%s)</p></div>', $this->xkey);
         }
+    }
+
+    // ------------------------
+    // PURGE / BAN
+    // ------------------------
+    public function flush($xkey = null)
+    {
+        $this->purge($xkey);
+    }
+
+    public function purge($xkey = null)
+    {
+        if (!empty($xkey) && !empty($xkey->ID)) {
+            $xkey = $xkey->ID;
+        }
+        $this->VarnishManager->purge($xkey);
+    }
+
+    private function get_register_events()
+    {
+        $actions = [
+            'publish_future_post',
+            'save_post',
+            'deleted_post',
+            'trashed_post',
+            'edit_post',
+        ];
+        return apply_filters('woody_varnish_events', $actions);
     }
 }

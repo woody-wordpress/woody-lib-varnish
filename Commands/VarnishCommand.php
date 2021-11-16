@@ -10,7 +10,8 @@ namespace Woody\Lib\Varnish\Commands;
 
 use Woody\App\Container;
 
-// WP_SITE_KEY=superot wp woody:varnish flush %key%
+// WP_SITE_KEY=superot wp woody:varnish purge %xkey%
+// WP_SITE_KEY=superot wp woody:varnish flush %xkey%
 
 class VarnishCommand
 {
@@ -22,12 +23,18 @@ class VarnishCommand
     public function __construct(Container $container)
     {
         $this->container = $container;
-        $this->dropZoneManager = $this->container->flush('varnish.manager');
+        $this->VarnishManager = $this->container->get('varnish.manager');
+    }
+
+    public function purge($args, $assoc_args)
+    {
+        list($name) = $args;
+        $this->VarnishManager->purge($name);
     }
 
     public function flush($args, $assoc_args)
     {
         list($name) = $args;
-        $this->dropZoneManager->flush($name);
+        $this->VarnishManager->purge($name);
     }
 }
