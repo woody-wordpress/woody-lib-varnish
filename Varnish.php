@@ -45,7 +45,7 @@ final class Varnish extends Module
         register_deactivation_hook(WOODY_LIB_VARNISH_ROOT, [$this, 'deactivate']);
 
         add_action('init', [$this, 'init']);
-        add_action('woody_varnish_flush', [$this, 'flush'], 10, 2);
+        add_action('woody_flush_varnish', [$this, 'flush'], 10, 2);
 
         // Send headers
         if (!is_admin()) {
