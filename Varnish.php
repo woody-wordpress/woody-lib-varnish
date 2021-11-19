@@ -16,7 +16,6 @@ use Woody\Lib\Varnish\Commands\VarnishCommand;
 final class Varnish extends Module
 {
     protected static $key = 'woody_lib_varnish';
-    protected $xkey = null;
 
     public function initialize(ParameterManager $parameters, Container $container)
     {
@@ -45,11 +44,14 @@ final class Varnish extends Module
         register_deactivation_hook(WOODY_LIB_VARNISH_ROOT, [$this, 'deactivate']);
 
         add_action('init', [$this, 'init']);
+        add_filter('query_vars', [$this, 'queryVars']);
+        add_action('template_redirect', [$this, 'forceLogout'], 1);
         add_action('woody_flush_varnish', [$this, 'flush'], 10, 2);
 
         // Send headers
         if (!is_admin()) {
             add_action('wp', [$this->VarnishManager, 'sendHeaders'], 1000000);
+            add_action('wp', [$this->VarnishManager, 'force_logout'], 1000000);
         }
 
         // Logged in cookie
@@ -60,13 +62,6 @@ final class Varnish extends Module
         foreach ($this->get_register_events() as $event) {
             add_action($event, [$this, 'flush'], 10, 2);
         }
-
-        // // Force remove varnish cookie if logout
-        // if (!is_user_logged_in() && !empty($_COOKIE[WOODY_VARNISH_CACHING_COOKIE])) {
-        //     setcookie(WOODY_VARNISH_CACHING_COOKIE, null, time()-3600*24*100, COOKIEPATH, COOKIE_DOMAIN, false, true);
-        //     wp_redirect('/wp/wp-login.php');
-        //     exit;
-        // }
     }
 
     // ------------------------
@@ -78,10 +73,26 @@ final class Varnish extends Module
             $user = wp_get_current_user();
             if (in_array('administrator', $user->roles)) {
                 add_action('admin_bar_menu', [$this, 'flush_admin_bar_menu'], 100);
-                if (isset($_GET['flush_admin_notice']) && check_admin_referer('varnish')) {
-                    $this->flush_admin_notice();
+                if (isset($_GET['flush_admin_varnish']) && check_admin_referer('varnish')) {
+                    $this->flush_admin_varnish();
                 }
             }
+        }
+
+        add_rewrite_rule('wp-logout', 'index.php?wp_logout=true', 'top');
+    }
+
+    public function queryVars($qvars)
+    {
+        $qvars[] = 'wp_logout';
+        return $qvars;
+    }
+
+    public function forceLogout($qvars)
+    {
+        $wp_logout = get_query_var('wp_logout');
+        if (!empty($wp_logout)) {
+            $this->VarnishManager->wp_logout();
         }
     }
 
@@ -89,25 +100,23 @@ final class Varnish extends Module
     {
         $admin_bar->add_menu(array(
             'id'    => 'flush-varnish',
-            'title' => 'Flush Varnish',
-            'href'  => wp_nonce_url(add_query_arg('flush_admin_notice', 1), 'varnish'),
+            'title' => '<span class="ab-icon dashicons dashicons-cloud-saved" style="top:2px;" aria-hidden="true"></span> Flush Varnish',
+            'href'  => wp_nonce_url(add_query_arg('flush_admin_varnish', 1), 'varnish'),
             'meta'  => array(
                 'title' => 'Flush Varnish',
             )
         ));
     }
 
-    public function flush_admin_notice()
+    public function flush_admin_varnish()
     {
-        $this->xkey = $this->VarnishManager->purge();
+        $this->VarnishManager->purge();
         add_action('admin_notices', [$this, 'flush_message']);
     }
 
     public function flush_message()
     {
-        if (!empty($this->xkey)) {
-            echo sprintf('<div id="message" class="updated fade"><p><strong>Varnish is flushed</strong> (%s)</p></div>', $this->xkey);
-        }
+        echo '<div id="message" class="updated fade"><p><strong>Varnish is flushed</strong></p></div>';
     }
 
     // ------------------------

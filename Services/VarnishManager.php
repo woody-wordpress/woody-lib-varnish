@@ -167,8 +167,21 @@ class VarnishManager
 
     public function wp_logout()
     {
+        rcd('logout', true);
         if (!empty(WOODY_VARNISH_CACHING_COOKIE)) {
             setcookie(WOODY_VARNISH_CACHING_COOKIE, null, time()-3600*24*100, COOKIEPATH, COOKIE_DOMAIN, false, true);
         }
+    }
+
+    public function force_logout()
+    {
+        // // Force remove varnish cookie if logout
+        // if (!is_user_logged_in() && !empty($_COOKIE[WOODY_VARNISH_CACHING_COOKIE])) {
+        //     global $wp;
+        //     $current_url = home_url(add_query_arg($_GET, $wp->request));
+        //     setcookie(WOODY_VARNISH_CACHING_COOKIE, null, time()-3600*24*100, COOKIEPATH, COOKIE_DOMAIN, false, true);
+        //     wp_redirect(wp_specialchars_decode(wp_logout_url($current_url)));
+        //     exit();
+        // }
     }
 }
