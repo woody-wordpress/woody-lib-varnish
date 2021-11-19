@@ -79,20 +79,20 @@ final class Varnish extends Module
             }
         }
 
-        add_rewrite_rule('wp-logout', 'index.php?wp_logout=true', 'top');
+        add_rewrite_rule('woody-logout', 'index.php?woody_logout=true', 'top');
     }
 
     public function queryVars($qvars)
     {
-        $qvars[] = 'wp_logout';
+        $qvars[] = 'woody_logout';
         return $qvars;
     }
 
     public function forceLogout($qvars)
     {
-        $wp_logout = get_query_var('wp_logout');
-        if (!empty($wp_logout)) {
-            $this->VarnishManager->wp_logout();
+        $woody_logout = get_query_var('woody_logout');
+        if (!empty($woody_logout)) {
+            $this->VarnishManager->woody_logout();
         }
     }
 
