@@ -42,8 +42,6 @@ class VarnishManager
     // ------------------------
     public function sendHeaders()
     {
-        global $post;
-
         // Headers X-VC
         $headers = [
             'X-VC-TTL' => '0',
@@ -53,7 +51,7 @@ class VarnishManager
 
         if (WOODY_VARNISH_CACHING_ENABLE) {
             $headers['X-VC-Enabled'] = 'true';
-            if (is_user_logged_in()) {
+            if (is_user_logged_in() || !empty($_COOKIE[WOODY_VARNISH_CACHING_COOKIE])) {
                 $headers['X-VC-Cacheable'] = 'NO:User is logged in';
             } else {
                 $headers['X-VC-TTL'] = $this->getTTL();
@@ -69,10 +67,13 @@ class VarnishManager
         }
 
         // xkeys to ban
-        $xkeys = [
-            WP_SITE_KEY,
-            WP_SITE_KEY . '_' . $post->ID
-        ];
+        $xkeys = [];
+        $xkeys[] = WP_SITE_KEY;
+
+        global $post;
+        if (!empty($post->ID) && !empty($post->ID)) {
+            $xkeys[] = WP_SITE_KEY . '_' . $post->ID;
+        }
 
         $xkeys = apply_filters('woody_varnish_override_xkeys', $xkeys);
         foreach ($xkeys as $val) {
@@ -174,6 +175,7 @@ class VarnishManager
 
     public function woody_logout()
     {
+        header('X-VC-TTL: 0');
         do_action('wp_logout');
         if (!empty($_GET['redirect_to'])) {
             wp_safe_redirect(trim(strip_tags($_GET['redirect_to'])), 302, 'Woody Varnish Logout');
