@@ -50,8 +50,8 @@ final class Varnish extends Module
 
         // Send headers
         if (!is_admin()) {
-            add_action('wp', [$this->VarnishManager, 'sendHeaders'], 1000000);
-            add_action('wp', [$this->VarnishManager, 'force_logout'], 1000000);
+            add_action('init', [$this->VarnishManager, 'send_headers'], 1000000);
+            add_action('wp', [$this->VarnishManager, 'send_post_headers'], 1000000);
         }
 
         // Logged in cookie
@@ -79,7 +79,9 @@ final class Varnish extends Module
             }
         }
 
+        // Force Logout si il ne reste que le cookies de varnish
         add_rewrite_rule('woody-logout', 'index.php?woody_logout=true', 'top');
+        $this->VarnishManager->force_logout();
     }
 
     public function queryVars($qvars)

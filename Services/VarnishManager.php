@@ -40,7 +40,7 @@ class VarnishManager
     // ------------------------
     // HEADERS
     // ------------------------
-    public function sendHeaders()
+    public function send_headers()
     {
         // Headers X-VC
         $headers = [
@@ -66,18 +66,15 @@ class VarnishManager
             header($key . ': ' . $val, true);
         }
 
-        // xkeys to ban
-        $xkeys = [];
-        $xkeys[] = WP_SITE_KEY;
+        // xkey for Varnish ban
+        header('xkey: ' . WP_SITE_KEY, false);
+    }
 
+    public function send_post_headers()
+    {
         global $post;
         if (!empty($post->ID) && !empty($post->ID)) {
-            $xkeys[] = WP_SITE_KEY . '_' . $post->ID;
-        }
-
-        $xkeys = apply_filters('woody_varnish_override_xkeys', $xkeys);
-        foreach ($xkeys as $val) {
-            header('xkey: ' . $val, false);
+            header('xkey: ' . WP_SITE_KEY . '_' . $post->ID, false);
         }
     }
 
