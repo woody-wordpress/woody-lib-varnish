@@ -54,7 +54,7 @@ class VarnishManager
             if (is_user_logged_in() || !empty($_COOKIE[WOODY_VARNISH_CACHING_COOKIE])) {
                 $headers['X-VC-Cacheable'] = 'NO:User is logged in';
             } else {
-                $headers['X-VC-TTL'] = $this->getTTL();
+                $headers['X-VC-TTL'] = WOODY_VARNISH_CACHING_TTL;
             }
             if (WOODY_VARNISH_CACHING_DEBUG) {
                 $headers['X-VC-Debug'] = 'true';
@@ -63,7 +63,7 @@ class VarnishManager
 
         $headers = apply_filters('woody_varnish_override_headers', $headers);
         foreach ($headers as $key => $val) {
-            header($key . ': ' . $val, true);
+            header($key . ': ' . $val);
         }
 
         // xkey for Varnish ban
@@ -75,6 +75,7 @@ class VarnishManager
         global $post;
         if (!empty($post->ID) && !empty($post->ID)) {
             header('xkey: ' . WP_SITE_KEY . '_' . $post->ID, false);
+            header('X-VC-TTL: ' . $this->getTTL());
         }
     }
 
