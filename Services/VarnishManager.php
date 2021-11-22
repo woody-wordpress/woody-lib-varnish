@@ -186,11 +186,11 @@ class VarnishManager
 
     public function force_logout()
     {
-        global $wp;
-
-        // Force remove varnish cookie if logout
-        if ($wp->request != 'woody-logout' && !is_user_logged_in() && !empty($_COOKIE[WOODY_VARNISH_CACHING_COOKIE])) {
-            $current_url = home_url(add_query_arg($_GET, $wp->request));
+        if (strpos($_SERVER['REQUEST_URI'], 'woody-logout') !== false) {
+            // Do nothing
+        } elseif (!is_user_logged_in() && !empty($_COOKIE[WOODY_VARNISH_CACHING_COOKIE])) {
+            // Force remove varnish cookie if logout
+            $current_url = home_url(add_query_arg($_GET, $_SERVER['REQUEST_URI']));
             wp_safe_redirect('/woody-logout?redirect_to='.$current_url, 302, 'Woody Varnish Logout');
             exit();
         }
