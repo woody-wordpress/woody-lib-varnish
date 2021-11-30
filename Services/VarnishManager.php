@@ -79,6 +79,12 @@ class VarnishManager
         }
     }
 
+    public function send_redirect_headers($url, $status = 302)
+    {
+        header('X-VC-TTL: 120');
+        return $url;
+    }
+
     private function getTTL()
     {
         $woody_varnish_caching_ttl = apply_filters('woody_varnish_override_ttl', null);
