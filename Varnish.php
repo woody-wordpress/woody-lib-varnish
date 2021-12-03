@@ -16,10 +16,11 @@ use Woody\Lib\Varnish\Commands\VarnishCommand;
 final class Varnish extends Module
 {
     protected static $key = 'woody_lib_varnish';
+    protected $status = null;
 
     public function initialize(ParameterManager $parameters, Container $container)
     {
-        define('WOODY_LIB_VARNISH_VERSION', '1.2.0');
+        define('WOODY_LIB_VARNISH_VERSION', '1.2.1');
         define('WOODY_LIB_VARNISH_ROOT', __FILE__);
         define('WOODY_LIB_VARNISH_DIR_ROOT', dirname(WOODY_LIB_VARNISH_ROOT));
 
@@ -115,13 +116,24 @@ final class Varnish extends Module
 
     public function flush_admin_varnish()
     {
-        $this->VarnishManager->purge();
+        $this->status = $this->VarnishManager->purge();
         add_action('admin_notices', [$this, 'flush_message']);
     }
 
     public function flush_message()
     {
-        echo '<div id="message" class="updated fade"><p><strong>Varnish is flushed</strong></p></div>';
+        $purgeme = (!empty($this->status) && $this->status['purgeme']) ? $this->status['purgeme'] : null;
+        $success = (!empty($this->status) && $this->status['success']) ? true : false;
+
+        if ($success) {
+            $class = 'updated';
+            $message = 'Varnish is flushed';
+        } else {
+            $class = 'error';
+            $message = 'Varnish not flushed (an error occured)';
+        }
+
+        echo sprintf('<div id="message" class="%s fade"><p><strong>%s</strong> - %s</p></div>', $class, $message, $purgeme);
     }
 
     // ------------------------
