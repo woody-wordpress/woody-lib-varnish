@@ -29,11 +29,18 @@ class VarnishManager
                 foreach ($errors as $error => $description) {
                     $noticeMessage .= ' - ' . $description;
                 }
-                output_warning(['woody_flush_varnish' => $noticeMessage, 'purgeme' => $purgeme]);
+                output_error(['woody_flush_varnish' => $noticeMessage, 'purgeme' => $purgeme]);
             }
+            return [
+                'success' => false,
+                'purgeme' => $purgeme,
+            ];
         } else {
             output_success(sprintf('woody_flush_varnish : %s', $purgeme));
-            return $xkey;
+            return [
+                'success' => true,
+                'purgeme' => $purgeme,
+            ];
         }
     }
 
