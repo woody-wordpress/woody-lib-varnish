@@ -20,7 +20,7 @@ final class Varnish extends Module
 
     public function initialize(ParameterManager $parameters, Container $container)
     {
-        define('WOODY_LIB_VARNISH_VERSION', '1.2.1');
+        define('WOODY_LIB_VARNISH_VERSION', '1.2.2');
         define('WOODY_LIB_VARNISH_ROOT', __FILE__);
         define('WOODY_LIB_VARNISH_DIR_ROOT', dirname(WOODY_LIB_VARNISH_ROOT));
 
@@ -61,11 +61,7 @@ final class Varnish extends Module
         // Logged in cookie
         add_action('wp_login', [$this->VarnishManager, 'wp_login'], 1000000);
         add_action('wp_logout', [$this->VarnishManager, 'wp_logout'], 1000000);
-
-        // Register events to purge post
-        foreach ($this->get_register_events() as $event) {
-            add_action($event, [$this, 'flush'], 10, 2);
-        }
+        add_action('save_post', [$this, 'flush'], 10, 2);
     }
 
     // ------------------------
@@ -150,17 +146,5 @@ final class Varnish extends Module
             $xkey = $xkey->ID;
         }
         $this->VarnishManager->purge($xkey);
-    }
-
-    private function get_register_events()
-    {
-        $actions = [
-            'publish_future_post',
-            'save_post',
-            'deleted_post',
-            'trashed_post',
-            'edit_post',
-        ];
-        return apply_filters('woody_varnish_events', $actions);
     }
 }

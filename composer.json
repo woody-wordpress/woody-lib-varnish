@@ -1,7 +1,7 @@
 {
     "name": "woody-wordpress/woody-lib-varnish",
     "type": "wordpress-vendor",
-    "version": "1.2.1",
+    "version": "1.2.2",
     "description": "This library adds Varnish features",
     "license": "GPL-2.0",
     "authors": [
