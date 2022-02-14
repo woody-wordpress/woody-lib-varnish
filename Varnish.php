@@ -20,7 +20,7 @@ final class Varnish extends Module
 
     public function initialize(ParameterManager $parameters, Container $container)
     {
-        define('WOODY_LIB_VARNISH_VERSION', '1.2.2');
+        define('WOODY_LIB_VARNISH_VERSION', '1.2.3');
         define('WOODY_LIB_VARNISH_ROOT', __FILE__);
         define('WOODY_LIB_VARNISH_DIR_ROOT', dirname(WOODY_LIB_VARNISH_ROOT));
 
@@ -49,11 +49,12 @@ final class Varnish extends Module
         add_action('template_redirect', [$this, 'forceLogout'], 1);
         add_action('woody_flush_varnish', [$this, 'flush'], 10, 2);
 
-        // Redirect HTTP headers and server-specific overrides
-        add_filter('wp_redirect', [$this->VarnishManager, 'send_redirect_headers']);
-
         // Send headers
-        if (!is_admin()) {
+        if (!is_admin() && !defined('WP_CLI')) {
+            // Redirect HTTP headers and server-specific overrides
+            add_filter('wp_redirect', [$this->VarnishManager, 'send_redirect_headers']);
+
+            // Init Headers xkey
             add_action('init', [$this->VarnishManager, 'send_headers']);
             add_action('wp', [$this->VarnishManager, 'send_post_headers']);
         }
