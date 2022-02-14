@@ -8,5 +8,5 @@
 
 function varnish_flush($name = null)
 {
-    return apply_filters('woody_varnish_flush', $name);
+    return do_action('woody_varnish_flush', $name);
 }
