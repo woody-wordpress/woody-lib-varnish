@@ -20,7 +20,7 @@ final class Varnish extends Module
 
     public function initialize(ParameterManager $parameters, Container $container)
     {
-        define('WOODY_LIB_VARNISH_VERSION', '1.2.3');
+        define('WOODY_LIB_VARNISH_VERSION', '1.2.4');
         define('WOODY_LIB_VARNISH_ROOT', __FILE__);
         define('WOODY_LIB_VARNISH_DIR_ROOT', dirname(WOODY_LIB_VARNISH_ROOT));
 
@@ -146,6 +146,12 @@ final class Varnish extends Module
         if (!empty($xkey) && !empty($xkey->ID)) {
             $xkey = $xkey->ID;
         }
+
+        // If this is just a revision, don't continue
+        if (wp_is_post_revision($xkey)) {
+            return;
+        }
+
         $this->VarnishManager->purge($xkey);
     }
 }
