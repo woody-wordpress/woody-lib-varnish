@@ -20,7 +20,7 @@ final class Varnish extends Module
 
     public function initialize(ParameterManager $parameters, Container $container)
     {
-        define('WOODY_LIB_VARNISH_VERSION', '1.2.4');
+        define('WOODY_LIB_VARNISH_VERSION', '1.3.0');
         define('WOODY_LIB_VARNISH_ROOT', __FILE__);
         define('WOODY_LIB_VARNISH_DIR_ROOT', dirname(WOODY_LIB_VARNISH_ROOT));
 
