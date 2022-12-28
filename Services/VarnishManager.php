@@ -22,7 +22,7 @@ class VarnishManager
         if ($response instanceof WP_Error) {
             foreach ($response->errors as $error => $errors) {
                 $noticeMessage = 'Error ' . $error . ' : ';
-                foreach ($errors as $error => $description) {
+                foreach ($errors as $description) {
                     $noticeMessage .= ' - ' . $description;
                 }
                 output_error(['woody_flush_varnish' => $noticeMessage, 'purgeme' => $purgeme]);
