@@ -15,16 +15,19 @@ use Woody\Lib\Varnish\Commands\VarnishCommand;
 
 final class Varnish extends Module
 {
-    protected static $key = 'woody_lib_varnish';
-    protected $status = null;
+    public $VarnishManager;
 
-    public function initialize(ParameterManager $parameters, Container $container)
+    protected static $key = 'woody_lib_varnish';
+
+    protected $status;
+
+    public function initialize(ParameterManager $parameterManager, Container $container)
     {
         define('WOODY_LIB_VARNISH_VERSION', '1.3.1');
         define('WOODY_LIB_VARNISH_ROOT', __FILE__);
         define('WOODY_LIB_VARNISH_DIR_ROOT', dirname(WOODY_LIB_VARNISH_ROOT));
 
-        parent::initialize($parameters, $container);
+        parent::initialize($parameterManager, $container);
         $this->VarnishManager = $this->container->get('varnish.manager');
         require_once WOODY_LIB_VARNISH_DIR_ROOT . '/Helpers/Helpers.php';
     }
@@ -60,8 +63,8 @@ final class Varnish extends Module
         }
 
         // Logged in cookie
-        add_action('wp_login', [$this->VarnishManager, 'wp_login'], 1000000);
-        add_action('wp_logout', [$this->VarnishManager, 'wp_logout'], 1000000);
+        add_action('wp_login', [$this->VarnishManager, 'wp_login'], 1_000_000);
+        add_action('wp_logout', [$this->VarnishManager, 'wp_logout'], 1_000_000);
         add_action('save_post', [$this, 'flush'], 10, 2);
     }
 
@@ -120,9 +123,8 @@ final class Varnish extends Module
     public function flush_message()
     {
         $purgeme = (!empty($this->status) && $this->status['purgeme']) ? $this->status['purgeme'] : null;
-        $success = (!empty($this->status) && $this->status['success']) ? true : false;
 
-        if ($success) {
+        if (!empty($this->status) && $this->status['success']) {
             $class = 'updated';
             $message = 'Varnish is flushed';
         } else {

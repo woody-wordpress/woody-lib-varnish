@@ -15,22 +15,20 @@ class VarnishManager
     // ------------------------
     public function purge($xkey = null)
     {
-        if (empty($xkey)) {
-            $xkey = WP_SITE_KEY;
-        } else {
-            $xkey = WP_SITE_KEY . '_' . $xkey;
-        }
+        $xkey = empty($xkey) ? WP_SITE_KEY : WP_SITE_KEY . '_' . $xkey;
 
         $purgeme = 'http://' . WOODY_VARNISH_CACHING_IPS . '/' . $xkey;
         $response = wp_remote_request($purgeme, ['method' => 'PURGE', "sslverify" => false]);
         if ($response instanceof WP_Error) {
             foreach ($response->errors as $error => $errors) {
                 $noticeMessage = 'Error ' . $error . ' : ';
-                foreach ($errors as $error => $description) {
+                foreach ($errors as $description) {
                     $noticeMessage .= ' - ' . $description;
                 }
+
                 output_error(['woody_flush_varnish' => $noticeMessage, 'purgeme' => $purgeme]);
             }
+
             return [
                 'success' => false,
                 'purgeme' => $purgeme,
@@ -63,6 +61,7 @@ class VarnishManager
             } else {
                 $headers['X-VC-TTL'] = WOODY_VARNISH_CACHING_TTL;
             }
+
             if (WOODY_VARNISH_CACHING_DEBUG) {
                 $headers['X-VC-Debug'] = 'true';
             }
@@ -160,6 +159,7 @@ class VarnishManager
                 break;
             }
         }
+
         return $return;
     }
 
@@ -186,14 +186,14 @@ class VarnishManager
     public function wp_login()
     {
         if (!empty(WOODY_VARNISH_CACHING_COOKIE)) {
-            setcookie(WOODY_VARNISH_CACHING_COOKIE, 1, time()+3600*24*100, COOKIEPATH, COOKIE_DOMAIN, false, true);
+            setcookie(WOODY_VARNISH_CACHING_COOKIE, 1, ['expires' => time()+3600*24*100, 'path' => COOKIEPATH, 'domain' => COOKIE_DOMAIN, 'secure' => false, 'httponly' => true]);
         }
     }
 
     public function wp_logout()
     {
         if (!empty(WOODY_VARNISH_CACHING_COOKIE)) {
-            setcookie(WOODY_VARNISH_CACHING_COOKIE, null, time()-3600*24*100, COOKIEPATH, COOKIE_DOMAIN, false, true);
+            setcookie(WOODY_VARNISH_CACHING_COOKIE, null, ['expires' => time()-3600*24*100, 'path' => COOKIEPATH, 'domain' => COOKIE_DOMAIN, 'secure' => false, 'httponly' => true]);
         }
     }
 
