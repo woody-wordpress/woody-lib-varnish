@@ -15,6 +15,7 @@ use Woody\Lib\Varnish\Commands\VarnishCommand;
 
 final class Varnish extends Module
 {
+    public $VarnishManager;
     protected static $key = 'woody_lib_varnish';
     protected $status = null;
 
@@ -120,7 +121,7 @@ final class Varnish extends Module
     public function flush_message()
     {
         $purgeme = (!empty($this->status) && $this->status['purgeme']) ? $this->status['purgeme'] : null;
-        $success = (!empty($this->status) && $this->status['success']) ? true : false;
+        $success = !empty($this->status) && $this->status['success'];
 
         if ($success) {
             $class = 'updated';

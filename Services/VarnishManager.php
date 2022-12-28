@@ -15,11 +15,7 @@ class VarnishManager
     // ------------------------
     public function purge($xkey = null)
     {
-        if (empty($xkey)) {
-            $xkey = WP_SITE_KEY;
-        } else {
-            $xkey = WP_SITE_KEY . '_' . $xkey;
-        }
+        $xkey = empty($xkey) ? WP_SITE_KEY : WP_SITE_KEY . '_' . $xkey;
 
         $purgeme = 'http://' . WOODY_VARNISH_CACHING_IPS . '/' . $xkey;
         $response = wp_remote_request($purgeme, ['method' => 'PURGE', "sslverify" => false]);
