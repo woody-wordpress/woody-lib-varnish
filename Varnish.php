@@ -121,9 +121,8 @@ final class Varnish extends Module
     public function flush_message()
     {
         $purgeme = (!empty($this->status) && $this->status['purgeme']) ? $this->status['purgeme'] : null;
-        $success = !empty($this->status) && $this->status['success'];
 
-        if ($success) {
+        if (!empty($this->status) && $this->status['success']) {
             $class = 'updated';
             $message = 'Varnish is flushed';
         } else {
