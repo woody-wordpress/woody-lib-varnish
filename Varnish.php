@@ -60,8 +60,8 @@ final class Varnish extends Module
         }
 
         // Logged in cookie
-        add_action('wp_login', [$this->VarnishManager, 'wp_login'], 1000000);
-        add_action('wp_logout', [$this->VarnishManager, 'wp_logout'], 1000000);
+        add_action('wp_login', [$this->VarnishManager, 'wp_login'], 1_000_000);
+        add_action('wp_logout', [$this->VarnishManager, 'wp_logout'], 1_000_000);
         add_action('save_post', [$this, 'flush'], 10, 2);
     }
 

@@ -186,14 +186,14 @@ class VarnishManager
     public function wp_login()
     {
         if (!empty(WOODY_VARNISH_CACHING_COOKIE)) {
-            setcookie(WOODY_VARNISH_CACHING_COOKIE, 1, time()+3600*24*100, COOKIEPATH, COOKIE_DOMAIN, false, true);
+            setcookie(WOODY_VARNISH_CACHING_COOKIE, 1, ['expires' => time()+3600*24*100, 'path' => COOKIEPATH, 'domain' => COOKIE_DOMAIN, 'secure' => false, 'httponly' => true]);
         }
     }
 
     public function wp_logout()
     {
         if (!empty(WOODY_VARNISH_CACHING_COOKIE)) {
-            setcookie(WOODY_VARNISH_CACHING_COOKIE, null, time()-3600*24*100, COOKIEPATH, COOKIE_DOMAIN, false, true);
+            setcookie(WOODY_VARNISH_CACHING_COOKIE, null, ['expires' => time()-3600*24*100, 'path' => COOKIEPATH, 'domain' => COOKIE_DOMAIN, 'secure' => false, 'httponly' => true]);
         }
     }
 

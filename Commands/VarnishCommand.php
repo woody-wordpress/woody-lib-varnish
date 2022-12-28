@@ -15,10 +15,7 @@ use Woody\App\Container;
 
 class VarnishCommand
 {
-    /**
-     * @var Container
-     */
-    private $container;
+    private \Woody\App\Container $container;
 
     public function __construct(Container $container)
     {
@@ -28,13 +25,13 @@ class VarnishCommand
 
     public function purge($args, $assoc_args)
     {
-        list($name) = $args;
+        [$name] = $args;
         $this->VarnishManager->purge($name);
     }
 
     public function flush($args, $assoc_args)
     {
-        list($name) = $args;
+        [$name] = $args;
         $this->VarnishManager->purge($name);
     }
 }
