@@ -21,13 +21,13 @@ final class Varnish extends Module
 
     protected $status;
 
-    public function initialize(ParameterManager $parameters, Container $container)
+    public function initialize(ParameterManager $parameterManager, Container $container)
     {
         define('WOODY_LIB_VARNISH_VERSION', '1.3.1');
         define('WOODY_LIB_VARNISH_ROOT', __FILE__);
         define('WOODY_LIB_VARNISH_DIR_ROOT', dirname(WOODY_LIB_VARNISH_ROOT));
 
-        parent::initialize($parameters, $container);
+        parent::initialize($parameterManager, $container);
         $this->VarnishManager = $this->container->get('varnish.manager');
         require_once WOODY_LIB_VARNISH_DIR_ROOT . '/Helpers/Helpers.php';
     }
