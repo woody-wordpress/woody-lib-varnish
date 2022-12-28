@@ -16,6 +16,7 @@ use Woody\App\Container;
 class VarnishCommand
 {
     public $VarnishManager;
+
     private \Woody\App\Container $container;
 
     public function __construct(Container $container)

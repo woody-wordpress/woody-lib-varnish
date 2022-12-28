@@ -16,7 +16,9 @@ use Woody\Lib\Varnish\Commands\VarnishCommand;
 final class Varnish extends Module
 {
     public $VarnishManager;
+
     protected static $key = 'woody_lib_varnish';
+
     protected $status;
 
     public function initialize(ParameterManager $parameters, Container $container)

@@ -25,8 +25,10 @@ class VarnishManager
                 foreach ($errors as $description) {
                     $noticeMessage .= ' - ' . $description;
                 }
+
                 output_error(['woody_flush_varnish' => $noticeMessage, 'purgeme' => $purgeme]);
             }
+
             return [
                 'success' => false,
                 'purgeme' => $purgeme,
@@ -59,6 +61,7 @@ class VarnishManager
             } else {
                 $headers['X-VC-TTL'] = WOODY_VARNISH_CACHING_TTL;
             }
+
             if (WOODY_VARNISH_CACHING_DEBUG) {
                 $headers['X-VC-Debug'] = 'true';
             }
@@ -156,6 +159,7 @@ class VarnishManager
                 break;
             }
         }
+
         return $return;
     }
 
