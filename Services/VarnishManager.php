@@ -15,31 +15,28 @@ class VarnishManager
     // ------------------------
     public function purge($xkey = null)
     {
+        $return = [];
         $xkey = empty($xkey) ? WP_SITE_KEY : WP_SITE_KEY . '_' . $xkey;
+        foreach (WOODY_VARNISH_CACHING_IPS as $woody_varnish_caching_ip) {
+            $purgeme = 'http://' . $woody_varnish_caching_ip . '/' . $xkey;
+            $response = wp_remote_request($purgeme, ['method' => 'PURGE', "sslverify" => false]);
+            if (!is_wp_error($response) && ($response['response']['code'] == 200 || $response['response']['code'] == 201)) {
+                output_success(sprintf('woody_flush_varnish : %s', $purgeme));
+                $return[$purgeme] = true;
+            } else {
+                foreach ($response->errors as $error => $errors) {
+                    $noticeMessage = 'Error ' . $error . ' : ';
+                    foreach ($errors as $description) {
+                        $noticeMessage .= ' - ' . $description;
+                    }
 
-        $purgeme = 'http://' . WOODY_VARNISH_CACHING_IPS . '/' . $xkey;
-        $response = wp_remote_request($purgeme, ['method' => 'PURGE', "sslverify" => false]);
-        if ($response instanceof WP_Error) {
-            foreach ($response->errors as $error => $errors) {
-                $noticeMessage = 'Error ' . $error . ' : ';
-                foreach ($errors as $description) {
-                    $noticeMessage .= ' - ' . $description;
+                    $return[$purgeme] = false;
+                    output_error(['woody_flush_varnish' => $noticeMessage, 'purgeme' => $purgeme]);
                 }
-
-                output_error(['woody_flush_varnish' => $noticeMessage, 'purgeme' => $purgeme]);
             }
-
-            return [
-                'success' => false,
-                'purgeme' => $purgeme,
-            ];
-        } else {
-            output_success(sprintf('woody_flush_varnish : %s', $purgeme));
-            return [
-                'success' => true,
-                'purgeme' => $purgeme,
-            ];
         }
+
+        return $return;
     }
 
     // ------------------------
