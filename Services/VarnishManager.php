@@ -151,7 +151,7 @@ class VarnishManager
     {
         $return = $section_content['acf_fc_layout'];
         foreach ($section_content as $field => $value) {
-            if (strpos($field, 'field_5b27a67203e48') !== false && $value == 'random') {
+            if (strpos($field, 'field_5b27a67203e48') !== false && $value == 'random' || strpos($field, 'field_64df5e9a12a3c') !== false && $value == 'random') {
                 $return .= '_random';
                 break;
             }
@@ -166,7 +166,7 @@ class VarnishManager
             return WOODY_VARNISH_CACHING_TTL_FOCUSSHEET;
         } elseif ($acf_fc_layout == 'auto_focus' || $acf_fc_layout == 'auto_focus_topics') {
             return WOODY_VARNISH_CACHING_TTL_FOCUS;
-        } elseif ($acf_fc_layout == 'auto_focus_random' || $acf_fc_layout == 'auto_focus_topics_random') {
+        } elseif ($acf_fc_layout == 'auto_focus_random' || $acf_fc_layout == 'auto_focus_topics_random' || $acf_fc_layout == 'profile_focus_random') {
             return WOODY_VARNISH_CACHING_TTL_FOCUSRANDOM;
         } elseif ($acf_fc_layout == 'weather') {
             return WOODY_VARNISH_CACHING_TTL_WEATHERPAGE;
