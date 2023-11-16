@@ -151,7 +151,7 @@ class VarnishManager
     {
         $return = $section_content['acf_fc_layout'];
         foreach ($section_content as $field => $value) {
-            if (strpos($field, 'field_5b27a67203e48') !== false && $value == 'random' || strpos($field, 'field_64df5e9a12a3c') !== false && $value == 'random' || $field['acf_fc_layout'] == 'youbook_focus') {
+            if (strpos($field, 'field_5b27a67203e48') !== false && $value == 'random' || strpos($field, 'field_64df5e9a12a3c') !== false && $value == 'random' || $return == 'youbook_focus') {
                 $return .= '_random';
                 break;
             }
