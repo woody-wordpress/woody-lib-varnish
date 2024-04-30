@@ -23,7 +23,7 @@ final class Varnish extends Module
 
     public function initialize(ParameterManager $parameterManager, Container $container)
     {
-        define('WOODY_LIB_VARNISH_VERSION', '1.6.3');
+        define('WOODY_LIB_VARNISH_VERSION', '1.6.4');
         define('WOODY_LIB_VARNISH_ROOT', __FILE__);
         define('WOODY_LIB_VARNISH_DIR_ROOT', dirname(WOODY_LIB_VARNISH_ROOT));
 
@@ -77,8 +77,9 @@ final class Varnish extends Module
             $user = wp_get_current_user();
             if (in_array('administrator', $user->roles)) {
                 add_action('admin_bar_menu', [$this, 'flush_admin_bar_menu'], 100);
+
                 if (isset($_GET['flush_admin_varnish']) && check_admin_referer('varnish')) {
-                    $this->flush_admin_varnish();
+                    $this->VarnishManager->purge();
                 }
             }
         }
@@ -112,11 +113,6 @@ final class Varnish extends Module
                 'title' => 'Flush Varnish',
             )
         ));
-    }
-
-    public function flush_admin_varnish()
-    {
-        $this->VarnishManager->purge();
     }
 
     // ------------------------
