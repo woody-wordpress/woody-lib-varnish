@@ -116,19 +116,7 @@ final class Varnish extends Module
 
     public function flush_admin_varnish()
     {
-        $this->status = $this->VarnishManager->purge();
-        add_action('admin_notices', [$this, 'flush_message']);
-    }
-
-    public function flush_message()
-    {
-        if (!empty($this->status) && is_array($this->status)) {
-            foreach ($this->status as $purgeme => $status) {
-                $class = ($status) ? 'updated' : 'error';
-                $message = ($status) ? 'Varnish is flushed' : 'Varnish not flushed (an error occured)';
-                echo sprintf('<div id="message" class="%s fade"><p><strong>%s</strong> - %s</p></div>', $class, $message, $purgeme);
-            }
-        }
+        $this->VarnishManager->purge();
     }
 
     // ------------------------
