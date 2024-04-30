@@ -8,11 +8,11 @@
 
 function varnish_flush($name = null)
 {
-    return do_action('woody_flush_varnish', $name);
+    do_action('woody_flush_varnish', $name);
 }
 
 
 function woody_flush_varnish($name = null)
 {
-    return do_action('woody_flush_varnish', $name);
+    do_action('woody_flush_varnish', $name);
 }
