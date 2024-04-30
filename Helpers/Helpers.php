@@ -6,13 +6,13 @@
  * @copyright Raccourci Agency 2021
  */
 
-function varnish_flush($name = null)
+function varnish_flush($xkey = null)
 {
-    do_action('woody_flush_varnish', $name);
+    do_action('woody_flush_varnish', $xkey);
 }
 
 
-function woody_flush_varnish($name = null)
+function woody_flush_varnish($xkey = null)
 {
-    do_action('woody_flush_varnish', $name);
+    do_action('woody_flush_varnish', $xkey);
 }

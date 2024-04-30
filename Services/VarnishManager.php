@@ -10,33 +10,42 @@ namespace Woody\Lib\Varnish\Services;
 
 class VarnishManager
 {
+    protected $notice;
+
     // ------------------------
     // PURGE METHOD
     // ------------------------
     public function purge($xkey = null)
     {
-        $return = [];
+        $actions = [];
         $xkey = empty($xkey) ? WP_SITE_KEY : WP_SITE_KEY . '_' . $xkey;
         foreach (WOODY_VARNISH_CACHING_IPS as $woody_varnish_caching_ip) {
             $purgeme = 'http://' . $woody_varnish_caching_ip . '/' . $xkey;
             $response = wp_remote_request($purgeme, ['method' => 'PURGE', "sslverify" => false]);
             if (!is_wp_error($response) && ($response['response']['code'] == 200 || $response['response']['code'] == 201)) {
                 output_success(sprintf('woody_flush_varnish : %s', $purgeme));
-                $return[$purgeme] = true;
+                $actions[$purgeme] = true;
             } else {
                 foreach ($response->errors as $error => $errors) {
-                    $noticeMessage = 'Error ' . $error . ' : ';
+                    $message = 'Error ' . $error . ' : ';
                     foreach ($errors as $description) {
-                        $noticeMessage .= ' - ' . $description;
+                        $message .= ' - ' . $description;
                     }
 
-                    $return[$purgeme] = false;
-                    output_error(['woody_flush_varnish' => $noticeMessage, 'purgeme' => $purgeme]);
+                    $actions[$purgeme] = false;
+                    output_error(['woody_flush_varnish' => $message, 'purgeme' => $purgeme]);
                 }
             }
         }
 
-        return $return;
+        if (!(defined('WP_CLI')) && !empty($actions) && is_array($actions)) {
+            foreach ($actions as $purgeme => $status) {
+                $class = ($status) ? 'updated' : 'error';
+                $message = ($status) ? 'Varnish is flushed' : 'Varnish not flushed (an error occured)';
+                $this->notice = sprintf('<div id="message" class="%s fade"><p><strong>%s</strong> - %s</p></div>', $class, $message, $purgeme);
+                add_action('admin_notices', function () { echo $this->notice; });
+            }
+        }
     }
 
     // ------------------------
@@ -183,14 +192,14 @@ class VarnishManager
     public function wp_login()
     {
         if (!empty(WOODY_VARNISH_CACHING_COOKIE)) {
-            setcookie(WOODY_VARNISH_CACHING_COOKIE, 1, ['expires' => time()+3600*24*100, 'path' => COOKIEPATH, 'domain' => COOKIE_DOMAIN, 'secure' => false, 'httponly' => true]);
+            setcookie(WOODY_VARNISH_CACHING_COOKIE, 1, ['expires' => time() + 3600 * 24 * 100, 'path' => COOKIEPATH, 'domain' => COOKIE_DOMAIN, 'secure' => false, 'httponly' => true]);
         }
     }
 
     public function wp_logout()
     {
         if (!empty(WOODY_VARNISH_CACHING_COOKIE)) {
-            setcookie(WOODY_VARNISH_CACHING_COOKIE, null, ['expires' => time()-3600*24*100, 'path' => COOKIEPATH, 'domain' => COOKIE_DOMAIN, 'secure' => false, 'httponly' => true]);
+            setcookie(WOODY_VARNISH_CACHING_COOKIE, null, ['expires' => time() - 3600 * 24 * 100, 'path' => COOKIEPATH, 'domain' => COOKIE_DOMAIN, 'secure' => false, 'httponly' => true]);
         }
     }
 
