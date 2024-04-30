@@ -10,3 +10,9 @@ function varnish_flush($name = null)
 {
     return do_action('woody_varnish_flush', $name);
 }
+
+
+function woody_varnish_flush($name = null)
+{
+    return do_action('woody_varnish_flush', $name);
+}
