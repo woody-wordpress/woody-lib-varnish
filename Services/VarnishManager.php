@@ -46,6 +46,9 @@ class VarnishManager
                 add_action('admin_notices', function () { echo $this->notice; });
             }
         }
+
+        // On vide toujours le CDN après avoir vider le Varnish complètement ou partiellement
+        do_action('woody_flush_cdn');
     }
 
     // ------------------------
