@@ -47,8 +47,10 @@ class VarnishManager
             }
         }
 
-        // On vide toujours le CDN après avoir vider le Varnish complètement ou partiellement
-        do_action('woody_flush_cdn');
+        // On vide toujours le CDN après avoir vidé le Varnish complètement ou partiellement si le CDN n'est pas cloudly
+        if(WOODY_CLOUDFLARE_ENABLE && !empty(WOODY_CLOUDFLARE_URL) && strpos(WOODY_CLOUDFLARE_URL, 'cloudly.space') === false) {
+            do_action('woody_flush_cdn');
+        }
     }
 
     // ------------------------
