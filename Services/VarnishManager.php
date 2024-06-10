@@ -18,7 +18,9 @@ class VarnishManager
     public function purge($xkey = null)
     {
         $actions = [];
-        $xkey = empty($xkey) ? WP_SITE_KEY : WP_SITE_KEY . '_' . $xkey;
+        if(strpos($xkey, 'multisite_') == false) {
+            $xkey = empty($xkey) ? WP_SITE_KEY : WP_SITE_KEY . '_' . $xkey;
+        }
         foreach (WOODY_VARNISH_CACHING_IPS as $woody_varnish_caching_ip) {
             $purgeme = 'http://' . $woody_varnish_caching_ip . '/' . $xkey;
             $response = wp_remote_request($purgeme, ['method' => 'PURGE', "sslverify" => false]);
