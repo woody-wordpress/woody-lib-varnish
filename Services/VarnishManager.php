@@ -18,7 +18,7 @@ class VarnishManager
     public function purge($xkey = null)
     {
         $actions = [];
-        if(strpos($xkey, 'multisite_') == false) {
+        if(empty($xkey) || strpos($xkey, 'multisite_') == false) {
             $xkey = empty($xkey) ? WP_SITE_KEY : WP_SITE_KEY . '_' . $xkey;
         }
         foreach (WOODY_VARNISH_CACHING_IPS as $woody_varnish_caching_ip) {
