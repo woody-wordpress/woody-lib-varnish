@@ -106,61 +106,56 @@ class VarnishManager
 
     private function getTTL()
     {
-        $woody_varnish_caching_ttl = apply_filters('woody_varnish_override_ttl', null);
-        if (!empty($woody_varnish_caching_ttl)) {
-            return $woody_varnish_caching_ttl;
-        } else {
-            global $post;
-            $woody_varnish_caching_ttl = WOODY_VARNISH_CACHING_TTL;
+        $woody_varnish_caching_ttl = WOODY_VARNISH_CACHING_TTL;
 
-            if (!empty($post)) {
-                // Using $post->post_password instead of post_password_required() that return false when the password is correct
-                // So protected pages where cached with default TTL
-                if ($post->post_password) {
-                    $woody_varnish_caching_ttl = 0;
-                } else {
-                    // Force "no format" because otherwise generates a cache or shortcodes are not yet generated
-                    $acf_fc_layouts = [];
-                    $sections = get_field('section', $post->ID, false);
-                    if (is_array($sections)) {
-                        foreach ($sections as $section) {
-                            // field_5b043f0525968 == section_content
-                            if (is_array($section['field_5b043f0525968'])) {
-                                foreach ($section['field_5b043f0525968'] as $section_content) {
-                                    if ($section_content['acf_fc_layout'] == 'tabs_group') {
+        global $post;
+        if (!empty($post)) {
+            // Using $post->post_password instead of post_password_required() that return false when the password is correct
+            // So protected pages where cached with default TTL
+            if ($post->post_password) {
+                $woody_varnish_caching_ttl = 0;
+            } else {
+                // Force "no format" because otherwise generates a cache or shortcodes are not yet generated
+                $acf_fc_layouts = [];
+                $sections = get_field('section', $post->ID, false);
+                if (is_array($sections)) {
+                    foreach ($sections as $section) {
+                        // field_5b043f0525968 == section_content
+                        if (is_array($section['field_5b043f0525968'])) {
+                            foreach ($section['field_5b043f0525968'] as $section_content) {
+                                if ($section_content['acf_fc_layout'] == 'tabs_group') {
 
-                                        // field_5b4722e2c1c13_field_5b471f474efee == tabs
-                                        if (is_array($section_content['field_5b4722e2c1c13_field_5b471f474efee'])) {
-                                            foreach ($section_content['field_5b4722e2c1c13_field_5b471f474efee'] as $tab) {
+                                    // field_5b4722e2c1c13_field_5b471f474efee == tabs
+                                    if (is_array($section_content['field_5b4722e2c1c13_field_5b471f474efee'])) {
+                                        foreach ($section_content['field_5b4722e2c1c13_field_5b471f474efee'] as $tab) {
 
-                                                // field_5b4728182f9b0_field_5b4727a878098_field_5b91294459c24 == light_section_content
-                                                if (is_array($tab['field_5b4728182f9b0_field_5b4727a878098_field_5b91294459c24'])) {
-                                                    foreach ($tab['field_5b4728182f9b0_field_5b4727a878098_field_5b91294459c24'] as $light_section_content) {
-                                                        $acf_fc_layouts[] = $this->isRandom($light_section_content);
-                                                    }
+                                            // field_5b4728182f9b0_field_5b4727a878098_field_5b91294459c24 == light_section_content
+                                            if (is_array($tab['field_5b4728182f9b0_field_5b4727a878098_field_5b91294459c24'])) {
+                                                foreach ($tab['field_5b4728182f9b0_field_5b4727a878098_field_5b91294459c24'] as $light_section_content) {
+                                                    $acf_fc_layouts[] = $this->isRandom($light_section_content);
                                                 }
                                             }
                                         }
-                                    } else {
-                                        $acf_fc_layouts[] = $this->isRandom($section_content);
                                     }
+                                } else {
+                                    $acf_fc_layouts[] = $this->isRandom($section_content);
                                 }
                             }
                         }
                     }
+                }
 
-                    $acf_fc_layouts = array_unique($acf_fc_layouts);
-                    foreach ($acf_fc_layouts as $acf_fc_layout) {
-                        $layout_ttl = $this->getTLLbyLayout($acf_fc_layout);
-                        if ($layout_ttl < $woody_varnish_caching_ttl) {
-                            $woody_varnish_caching_ttl = $layout_ttl;
-                        }
+                $acf_fc_layouts = array_unique($acf_fc_layouts);
+                foreach ($acf_fc_layouts as $acf_fc_layout) {
+                    $layout_ttl = $this->getTLLbyLayout($acf_fc_layout);
+                    if ($layout_ttl < $woody_varnish_caching_ttl) {
+                        $woody_varnish_caching_ttl = $layout_ttl;
                     }
                 }
             }
-
-            return $woody_varnish_caching_ttl;
         }
+
+        return $woody_varnish_caching_ttl;
     }
 
     private function isRandom($section_content)
