@@ -161,10 +161,28 @@ class VarnishManager
     private function isRandom($section_content)
     {
         $return = $section_content['acf_fc_layout'];
+
         foreach ($section_content as $field => $value) {
-            if (strpos($field, 'field_5b27a67203e48') !== false && $value == 'random' || strpos($field, 'field_64df5e9a12a3c') !== false && $value == 'random' || strpos($field, 'field_6661b3e125d63') !== false && $value == 'random' || $return == 'youbook_focus') {
-                $return .= '_random';
-                break;
+            if ($section_content['acf_fc_layout'] == 'catalog_focus') {
+                if(is_array($value) && !empty($value) && $field == 'field_669697ce6670c_field_669769b831caa') {
+                    foreach ($value as $fields) {
+                        if(!empty($fields['field_66977eb92b7df'])) {
+                            foreach ($fields['field_66977eb92b7df'] as $subfield => $subvalue) {
+                                if(!empty($subfield) && $subfield == 'field_669783f6b5d13' && !empty($subvalue['field_66978461e3beb'])) {
+                                    if($subvalue['field_66978461e3beb'] == 'random') {
+                                        $return .= '_random';
+                                        break;
+                                    }
+                                }
+                            }
+                        }
+                    }
+                }
+            } else {
+                if (strpos($field, 'field_5b27a67203e48') !== false && $value == 'random' || strpos($field, 'field_64df5e9a12a3c') !== false && $value == 'random' || strpos($field, 'field_6661b3e125d63') !== false && $value == 'random' || $return == 'youbook_focus') {
+                    $return .= '_random';
+                    break;
+                }
             }
         }
 
@@ -175,9 +193,9 @@ class VarnishManager
     {
         if ($acf_fc_layout == 'auto_focus_sheets' || $acf_fc_layout == 'manual_focus_minisheet' || $acf_fc_layout == 'event_block') {
             return WOODY_VARNISH_CACHING_TTL_FOCUSSHEET;
-        } elseif ($acf_fc_layout == 'auto_focus' || $acf_fc_layout == 'auto_focus_topics' || $acf_fc_layout == 'youbook_focus' || $acf_fc_layout == 'auto_focus_leaflets') {
+        } elseif ($acf_fc_layout == 'auto_focus' || $acf_fc_layout == 'auto_focus_topics' || $acf_fc_layout == 'youbook_focus' || $acf_fc_layout == 'auto_focus_leaflets' || $acf_fc_layout == 'catalog_focus') {
             return WOODY_VARNISH_CACHING_TTL_FOCUS;
-        } elseif ($acf_fc_layout == 'auto_focus_random' || $acf_fc_layout == 'auto_focus_topics_random' || $acf_fc_layout == 'profile_focus_random' || $acf_fc_layout == 'youbook_focus_random' || $acf_fc_layout == 'auto_focus_leaflets_random') {
+        } elseif ($acf_fc_layout == 'auto_focus_random' || $acf_fc_layout == 'auto_focus_topics_random' || $acf_fc_layout == 'profile_focus_random' || $acf_fc_layout == 'youbook_focus_random' || $acf_fc_layout == 'auto_focus_leaflets_random' || $acf_fc_layout == 'catalog_focus_random') {
             return WOODY_VARNISH_CACHING_TTL_FOCUSRANDOM;
         } elseif ($acf_fc_layout == 'weather') {
             return WOODY_VARNISH_CACHING_TTL_WEATHERPAGE;
