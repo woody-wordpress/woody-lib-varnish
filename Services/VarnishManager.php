@@ -21,13 +21,14 @@ class VarnishManager
         if (strpos($xkey, 'multisite_') === false) {
             $xkey = empty($xkey) ? WP_SITE_KEY : WP_SITE_KEY . '_' . $xkey;
         }
+
         foreach (WOODY_VARNISH_CACHING_IPS as $woody_varnish_caching_ip) {
             $purgeme = 'http://' . $woody_varnish_caching_ip . '/' . $xkey;
             $response = wp_remote_request($purgeme, ['method' => 'PURGE', "sslverify" => false]);
             if (!is_wp_error($response) && ($response['response']['code'] == 200 || $response['response']['code'] == 201)) {
                 output_success(sprintf('woody_flush_varnish : %s', $purgeme));
                 $actions[$purgeme] = true;
-            } else {
+            } elseif(!empty($response->errors)) {
                 foreach ($response->errors as $error => $errors) {
                     $message = 'Error ' . $error . ' : ';
                     foreach ($errors as $description) {
@@ -37,6 +38,10 @@ class VarnishManager
                     $actions[$purgeme] = false;
                     output_error(['woody_flush_varnish' => $message, 'purgeme' => $purgeme]);
                 }
+            } elseif($response['response']['code'] != 200 && $response['response']['code'] != 201) {
+                $message = 'Error ' . $response['response']['code'] . ' : ' . $response['response']['message'];
+                $actions[$purgeme] = false;
+                output_error(['woody_flush_varnish' => $message, 'purgeme' => $purgeme]);
             }
         }
 
