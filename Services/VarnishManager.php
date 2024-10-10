@@ -23,11 +23,11 @@ class VarnishManager
         }
 
         foreach (WOODY_VARNISH_CACHING_IPS as $woody_varnish_caching_ip) {
-            $purgeme = 'http://' . $woody_varnish_caching_ip . '/' . $xkey;
-            $response = wp_remote_request($purgeme, ['method' => 'PURGE', "sslverify" => false]);
+            $purge_url = 'http://' . $woody_varnish_caching_ip . '/' . $xkey;
+            $response = wp_remote_request($purge_url, ['method' => 'PURGE', 'sslverify' => false]);
             if (!is_wp_error($response) && ($response['response']['code'] == 200 || $response['response']['code'] == 201)) {
-                output_success(sprintf('woody_flush_varnish : %s', $purgeme));
-                $actions[$purgeme] = true;
+                output_success(sprintf('woody_flush_varnish : %s', $purge_url));
+                $actions[$purge_url] = true;
             } elseif(!empty($response->errors)) {
                 foreach ($response->errors as $error => $errors) {
                     $message = 'Error ' . $error . ' : ';
@@ -35,21 +35,21 @@ class VarnishManager
                         $message .= ' - ' . $description;
                     }
 
-                    $actions[$purgeme] = false;
-                    output_error(['woody_flush_varnish' => $message, 'purgeme' => $purgeme]);
+                    $actions[$purge_url] = false;
+                    output_error(['woody_flush_varnish' => $message, 'purge_url' => $purge_url]);
                 }
             } elseif($response['response']['code'] != 200 && $response['response']['code'] != 201) {
                 $message = 'Error ' . $response['response']['code'] . ' : ' . $response['response']['message'];
-                $actions[$purgeme] = false;
-                output_error(['woody_flush_varnish' => $message, 'purgeme' => $purgeme]);
+                $actions[$purge_url] = false;
+                output_error(['woody_flush_varnish' => $message, 'purge_url' => $purge_url]);
             }
         }
 
         if (!(defined('WP_CLI')) && !empty($actions) && is_array($actions)) {
-            foreach ($actions as $purgeme => $status) {
+            foreach ($actions as $purge_url => $status) {
                 $class = ($status) ? 'updated' : 'error';
                 $message = ($status) ? 'Varnish is flushed' : 'Varnish not flushed (an error occured)';
-                $this->notice = sprintf('<div id="message" class="%s fade"><p><strong>%s</strong> - %s</p></div>', $class, $message, $purgeme);
+                $this->notice = sprintf('<div id="message" class="%s fade"><p><strong>%s</strong> - %s</p></div>', $class, $message, $purge_url);
                 add_action('admin_notices', function () { echo $this->notice; });
             }
         }
