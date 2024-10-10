@@ -36,12 +36,12 @@ class VarnishManager
                     }
 
                     $actions[$purge_url] = false;
-                    output_error(['woody_flush_varnish' => $message, 'purge_url' => $purge_url]);
+                    output_warning(['woody_flush_varnish' => $message, 'purge_url' => $purge_url]);
                 }
             } elseif($response['response']['code'] != 200 && $response['response']['code'] != 201) {
                 $message = 'Error ' . $response['response']['code'] . ' : ' . $response['response']['message'];
                 $actions[$purge_url] = false;
-                output_error(['woody_flush_varnish' => $message, 'purge_url' => $purge_url]);
+                output_warning(['woody_flush_varnish' => $message, 'purge_url' => $purge_url]);
             }
         }
 
