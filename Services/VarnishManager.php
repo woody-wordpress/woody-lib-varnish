@@ -200,7 +200,6 @@ class VarnishManager
 
     private function getTLLbyLayout($acf_fc_layout)
     {
-        error_log("getTLLbyLayout - acf_fc_layout : " . $acf_fc_layout . PHP_EOL);
         if ($acf_fc_layout == 'auto_focus_sheets' || $acf_fc_layout == 'manual_focus_minisheet' || $acf_fc_layout == 'event_block') {
             return WOODY_VARNISH_CACHING_TTL_FOCUSSHEET;
         } elseif ($acf_fc_layout == 'auto_focus' || $acf_fc_layout == 'auto_focus_topics' || $acf_fc_layout == 'youbook_focus' || $acf_fc_layout == 'auto_focus_leaflets' || $acf_fc_layout == 'catalog_focus') {
