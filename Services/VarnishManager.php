@@ -52,7 +52,8 @@ class VarnishManager
                     $message = ($status) ? 'Varnish is flushed' : 'Varnish not flushed (an error occured)';
                     $this->notice .= sprintf('<div id="message" class="%s fade"><p><strong>%s</strong> - %s</p></div>', $class, $message, $purge_url);
                 }
-                add_action('admin_notices', function () { echo $this->notice; });
+                // TODO: Revoir cette notice qui apparait pour les clients à des moments bizarres
+                //add_action('admin_notices', function () { echo $this->notice; });
             }
         } else {
             output_error(['WOODY_VARNISH_CACHING_IPS is empty or not array' => WOODY_VARNISH_CACHING_IPS]);
