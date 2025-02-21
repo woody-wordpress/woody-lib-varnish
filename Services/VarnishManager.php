@@ -23,7 +23,14 @@ class VarnishManager
         }
 
         if(!empty(WOODY_VARNISH_CACHING_IPS) && is_array(WOODY_VARNISH_CACHING_IPS)) {
-            foreach (WOODY_VARNISH_CACHING_IPS as $woody_varnish_caching_ip) {
+
+            // Add Flush CDN if Cloudflare Protection is enabled
+            $woody_varnish_caching_ips = WOODY_VARNISH_CACHING_IPS;
+            if((in_array('cloudflare_protection', WOODY_OPTIONS_ERP) || in_array('cloudflare_protection', WOODY_OPTIONS)) && !in_array('flushcdn.infra.raccourci.fr:80', $woody_varnish_caching_ips)) {
+                $woody_varnish_caching_ips[] = 'flushcdn.infra.raccourci.fr:80';
+            }
+
+            foreach ($woody_varnish_caching_ips as $woody_varnish_caching_ip) {
                 $purge_url = 'http://' . $woody_varnish_caching_ip . '/' . $xkey;
                 $response = wp_remote_request($purge_url, ['method' => 'PURGE', 'sslverify' => false]);
                 if (!is_wp_error($response) && ($response['response']['code'] == 200 || $response['response']['code'] == 201)) {
@@ -57,11 +64,6 @@ class VarnishManager
             }
         } else {
             output_error(['WOODY_VARNISH_CACHING_IPS is empty or not array' => WOODY_VARNISH_CACHING_IPS]);
-        }
-
-        // On vide toujours le CDN après avoir vidé le Varnish complètement ou partiellement si le CDN n'est pas cloudly
-        if(WOODY_CLOUDFLARE_ENABLE && !empty(WOODY_CLOUDFLARE_URL) && strpos(WOODY_CLOUDFLARE_URL, 'cloudly.space') === false) {
-            do_action('woody_flush_cdn');
         }
     }
 
